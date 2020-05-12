@@ -1,5 +1,9 @@
 package com.appsolace.androidtask
 
+import android.content.Context
+import android.content.res.Resources.NotFoundException
+import android.graphics.Bitmap
+import android.graphics.Canvas
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -7,6 +11,7 @@ import android.view.View
 
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
@@ -20,9 +25,7 @@ import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.GoogleMap.OnMarkerClickListener
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
-import com.google.android.gms.maps.model.CameraPosition
-import com.google.android.gms.maps.model.LatLng
-import com.google.android.gms.maps.model.MarkerOptions
+import com.google.android.gms.maps.model.*
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import kotlinx.android.synthetic.main.activity_maps.*
 
@@ -44,16 +47,20 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback ,ResponseListener{
         mapFragment.getMapAsync(this)
         viewModel= ViewModelProvider(this).get(UserViewModel::class.java)
         rl_loading.visibility=View.GONE
+        calltoserver()
+    }
+
+    fun calltoserver(){
         if (isNetworkAvailable(this)){
             //calling ai from view and get response
             rl_loading.visibility=View.VISIBLE
             viewModel!!.getusers(this).observe(this, Observer { mlistuser->
-               // mUserResponseModellist.addAll(mlistuser as Array<out UserResponseModel>)
+                // mUserResponseModellist.addAll(mlistuser as Array<out UserResponseModel>)
                 Log.e("size",mlistuser.size.toString())
                 rl_loading.visibility=View.GONE
                 if (mlistuser.size>0) {
                     mMap.clear()
-                        // adding marker
+                    // adding marker
                     for (i in mlistuser.indices) {
 
                         mMap.addMarker(
@@ -63,6 +70,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback ,ResponseListener{
                                         mlistuser.get(i).address!!.geo!!.lat!!,
                                         mlistuser.get(i).address!!.geo!!.lng!!
                                     )).title("")
+                                .icon(bitmapDescriptorFromVector(this, R.drawable.ic_username))
                         ).tag=i
                     }
 
@@ -82,7 +90,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback ,ResponseListener{
                     mMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition))
 
                     mMap.setOnMarkerClickListener(OnMarkerClickListener { marker ->
-                      val position = marker.tag as Int
+                        val position = marker.tag as Int
                         showuser_DetailDialog(mlistuser.get(position))
 
                         true
@@ -91,13 +99,26 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback ,ResponseListener{
 
             })
         }else{
-
+            Toast.makeText(this, resources.getString(R.string.nointernet), Toast.LENGTH_SHORT).show()
         }
     }
-
     override fun onMapReady(googleMap: GoogleMap) {
         mMap = googleMap
         mMap.getUiSettings().setZoomControlsEnabled(true)
+        try {
+            // Customise the styling of the base map using a JSON object defined
+            // in a raw resource file.
+            val success = mMap.setMapStyle(
+                MapStyleOptions.loadRawResourceStyle(
+                    this, R.raw.style_json
+                )
+            )
+            if (!success) {
+               //Log.e(TAG, "Style parsing failed.");
+            }
+        } catch (e: NotFoundException) {
+            // Log.e(TAG, "Can't find style. Error: ", e);
+        }
 
     }
 
@@ -112,7 +133,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback ,ResponseListener{
             LayoutInflater.from(this),
             R.layout.bottomsheet_userinfo,
             null, false)
-        val dialog = BottomSheetDialog(this!!)
+        val dialog = BottomSheetDialog(this)
         dialog.setContentView(dialogbinding.root)
         dialog.setCancelable(false)
         dialogbinding.mUser=mUserResponseModel
@@ -123,5 +144,14 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback ,ResponseListener{
 
         dialog.show()
 
+    }
+    private fun bitmapDescriptorFromVector(context: Context, vectorResId: Int): BitmapDescriptor? {
+        return ContextCompat.getDrawable(context, vectorResId)?.run {
+            setBounds(0, 0, intrinsicWidth, intrinsicHeight)
+            val bitmap =
+                Bitmap.createBitmap(intrinsicWidth, intrinsicHeight, Bitmap.Config.ARGB_8888)
+            draw(Canvas(bitmap))
+            BitmapDescriptorFactory.fromBitmap(bitmap)
+        }
     }
 }

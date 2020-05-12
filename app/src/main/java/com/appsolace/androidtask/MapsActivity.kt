@@ -43,7 +43,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback ,ResponseListener{
             viewModel!!.getusers(this).observe(this, Observer { mlistuser->
                // mUserResponseModellist.addAll(mlistuser as Array<out UserResponseModel>)
                 Log.e("size",mlistuser.size.toString())
-               // var count=0;
+
                 if (mlistuser.size>0) {
                     mMap.clear()
                         // adding marker
@@ -77,7 +77,6 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback ,ResponseListener{
                     mMap.setOnMarkerClickListener(OnMarkerClickListener { marker ->
                       val position = marker.tag as Int
 
-                        //Using position get Value from arraylist
                        Toast.makeText(this, mlistuser.get(position).name, Toast.LENGTH_SHORT).show()
                         true
                     })

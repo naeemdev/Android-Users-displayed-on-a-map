@@ -7,11 +7,11 @@ class Geo_DataModel(
 
     @SerializedName("lat")
     @Expose
-    var lat: String? = null,
+    var lat: Double? = 0.0,
 
     @SerializedName("lng")
     @Expose
-    var lng: String? = null
+    var lng: Double? = 0.0
 ) {
 
 

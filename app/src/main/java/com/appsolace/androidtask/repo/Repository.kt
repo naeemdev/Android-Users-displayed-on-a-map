@@ -9,7 +9,7 @@ import retrofit2.Callback
 import retrofit2.Response
 
 class Repository {
-    //get Users list from API 
+    //get Users list from API
     fun get_users(listener: ResponseListener): MutableLiveData<List<UserResponseModel>> {
         ///ini Retrofit Class
         val country_modelist = MutableLiveData<List<UserResponseModel>>()

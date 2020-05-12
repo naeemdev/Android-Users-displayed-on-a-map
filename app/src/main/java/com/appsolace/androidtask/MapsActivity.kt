@@ -4,7 +4,7 @@ import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
-import android.view.Window
+
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
@@ -24,32 +24,33 @@ import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
 import com.google.android.material.bottomsheet.BottomSheetDialog
-import java.util.*
+import kotlinx.android.synthetic.main.activity_maps.*
+
 
 
 class MapsActivity : AppCompatActivity(), OnMapReadyCallback ,ResponseListener{
 
     private lateinit var mMap: GoogleMap
-    var mUserResponseModellist: MutableList<UserResponseModel> = ArrayList<UserResponseModel>()
     var viewModel: UserViewModel?=null
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        //making this activity full screen
-        window.requestFeature(Window.FEATURE_NO_TITLE)
+
         setContentView(R.layout.activity_maps)
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         val mapFragment = supportFragmentManager
             .findFragmentById(R.id.map) as SupportMapFragment
         mapFragment.getMapAsync(this)
         viewModel= ViewModelProvider(this).get(UserViewModel::class.java)
+        rl_loading.visibility=View.GONE
         if (isNetworkAvailable(this)){
             //calling ai from view and get response
+            rl_loading.visibility=View.VISIBLE
             viewModel!!.getusers(this).observe(this, Observer { mlistuser->
                // mUserResponseModellist.addAll(mlistuser as Array<out UserResponseModel>)
                 Log.e("size",mlistuser.size.toString())
-
+                rl_loading.visibility=View.GONE
                 if (mlistuser.size>0) {
                     mMap.clear()
                         // adding marker
@@ -97,13 +98,11 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback ,ResponseListener{
     override fun onMapReady(googleMap: GoogleMap) {
         mMap = googleMap
         mMap.getUiSettings().setZoomControlsEnabled(true)
-        // Add a marker in Sydney and move the camera
-       // val sydney = LatLng(-34.0, 151.0)
-       // mMap.addMarker(MarkerOptions().position(sydney).title("Marker in Sydney"))
-        //mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney))
+
     }
 
     override fun onError(message: String) {
+        rl_loading.visibility=View.GONE
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
     }
 

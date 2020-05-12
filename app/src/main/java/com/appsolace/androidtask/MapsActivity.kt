@@ -2,11 +2,15 @@ package com.appsolace.androidtask
 
 import android.os.Bundle
 import android.util.Log
+import android.view.LayoutInflater
+import android.view.View
 import android.view.Window
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
+import com.appsolace.androidtask.databinding.BottomsheetUserinfoBinding
 import com.appsolace.androidtask.model.UserResponseModel
 import com.appsolace.androidtask.repo.ResponseListener
 import com.appsolace.androidtask.utils.isNetworkAvailable
@@ -19,6 +23,7 @@ import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
+import com.google.android.material.bottomsheet.BottomSheetDialog
 import java.util.*
 
 
@@ -27,6 +32,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback ,ResponseListener{
     private lateinit var mMap: GoogleMap
     var mUserResponseModellist: MutableList<UserResponseModel> = ArrayList<UserResponseModel>()
     var viewModel: UserViewModel?=null
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -76,13 +82,15 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback ,ResponseListener{
 
                     mMap.setOnMarkerClickListener(OnMarkerClickListener { marker ->
                       val position = marker.tag as Int
+                        showuser_DetailDialog(mlistuser.get(position))
 
-                       Toast.makeText(this, mlistuser.get(position).name, Toast.LENGTH_SHORT).show()
                         true
                     })
                 }
 
             })
+        }else{
+
         }
     }
 
@@ -97,5 +105,24 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback ,ResponseListener{
 
     override fun onError(message: String) {
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
+    }
+
+    fun showuser_DetailDialog(mUserResponseModel:UserResponseModel) {
+
+        val dialogbinding: BottomsheetUserinfoBinding=   DataBindingUtil.inflate(
+            LayoutInflater.from(this),
+            R.layout.bottomsheet_userinfo,
+            null, false)
+        val dialog = BottomSheetDialog(this!!)
+        dialog.setContentView(dialogbinding.root)
+        dialog.setCancelable(false)
+        dialogbinding.mUser=mUserResponseModel
+        dialogbinding.btnClose.setOnClickListener(View.OnClickListener {
+
+            dialog.dismiss()
+        })
+
+        dialog.show()
+
     }
 }

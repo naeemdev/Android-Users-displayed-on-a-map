@@ -51,4 +51,10 @@ dependencies {
     implementation "androidx.lifecycle:lifecycle-extensions:$lifecycle_version"
     implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycle_version"
      kapt "androidx.lifecycle:lifecycle-compiler:$lifecycle_version"
+    //okhttp3
+    implementation 'com.squareup.okhttp3:logging-interceptor:4.2.2'
+
+    // retrofit
+    implementation 'com.squareup.retrofit2:retrofit:2.7.1'
+    implementation 'com.squareup.retrofit2:converter-gson:2.7.1'
 }
